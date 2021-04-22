@@ -1,0 +1,47 @@
+{
+    "name": "yaroslawww/nova-chunked-video",
+    "description": "A highly targeted package for downloading video in chunks.",
+    "keywords": [
+        "laravel-nova",
+        "nova",
+        "video",
+        "upload",
+        "chunks"
+    ],
+    "homepage": "https://github.com/yaroslawww/nova-chunked-video",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Yaroslav Georgitsa",
+            "email": "yaroslav.georgitsa@gmail.com",
+            "homepage": "https://github.com/yaroslawww",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.16"
+    },
+    "autoload": {
+        "psr-4": {
+            "Thinkone\\ChunkedVideo\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Thinkone\\ChunkedVideo\\FieldServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "format": "vendor/bin/php-cs-fixer fix --allow-risky=yes"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
