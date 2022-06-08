@@ -3,6 +3,14 @@ A highly targeted package for downloading video in chunks.
 
 ![](doc/assets/video-upload-example.gif)
 
+## Versions targeting
+
+| Package | Nova  |
+|---------|-------|
+| 1.x     | 3.x   |
+| 2.x     | 4.x   |
+
+
 ## Installation
 
 You can install the package via composer:

@@ -19,7 +19,7 @@ class VideoController extends Controller
 
         $model = $resource->model();
 
-        if (! $model || ! $request->user()) {
+        if (!$model || !$request->user()) {
             throw ValidationException::withMessages([ 'file' => 'not valid model' ]);
         }
 
@@ -27,20 +27,19 @@ class VideoController extends Controller
 
         /** @var ChunkedVideo|null $field */
         $field = $this->findField($request, $fields);
-        if (! $field) {
+        if (!$field) {
             throw new \Exception('Not valid field');
         }
 
-        $file = $request->file('file');
-        $storage = Storage::disk($field->disk);
+        $file      = $request->file('file');
+        $storage   = Storage::disk($field->disk);
         $chunksDir = $field->getChunksFolder();
 
         $fileName = "{$model->getKey()}-{$request->user()->getKey()}-{$field->attribute}-{$file->getClientOriginalName()}";
-        $path = "{$chunksDir}{$fileName}";
-
+        $path     = "{$chunksDir}{$fileName}";
 
         // Create empty file if file not exists
-        if (! $storage->exists($path)) {
+        if (!$storage->exists($path)) {
             $storage->put($path, '');
         }
 
@@ -51,23 +50,22 @@ class VideoController extends Controller
         if ($storage->size($path) > $field->getMaxSize()) {
             $storage->delete($path);
 
-            throw ValidationException::withMessages([ 'file' => 'file greater than 3GB' ]);
+            throw ValidationException::withMessages([ 'file' => 'file greater than max size' ]);
         }
 
         if ($request->has('is_last') && $request->boolean('is_last')) {
             $fileName = basename($path, '.part');
-            $newPath = "{$chunksDir}{$fileName}";
+            $newPath  = "{$chunksDir}{$fileName}";
 
             // remove old file if exists
             $storage->delete($newPath);
             // move file
-            $storage->rename($path, $newPath);
+            $storage->move($path, $newPath);
 
             $videoUrl = $field->storeFile($request, $newPath);
 
             return response()->json([ 'uploaded' => true, 'video_url' => $videoUrl ]);
         }
-
 
         return response()->json([ 'uploaded' => true ]);
     }
@@ -85,14 +83,14 @@ class VideoController extends Controller
         /** @var Field $field */
         foreach ($fields as $field) {
             if (get_class($field) == 'Epartment\NovaDependencyContainer\NovaDependencyContainer') {
-                if (! empty($field->meta['fields'])) {
+                if (!empty($field->meta['fields'])) {
                     $field = $this->findField($request, $field->meta['fields']);
                     if ($field && $field instanceof ChunkedVideo) {
                         return $field;
                     }
                 }
             } else {
-                if ($field instanceof ChunkedVideo && ! empty($field->attribute) && $field->attribute == $request->field) {
+                if ($field instanceof ChunkedVideo && !empty($field->attribute) && $field->attribute == $request->field) {
                     return $field;
                 }
             }

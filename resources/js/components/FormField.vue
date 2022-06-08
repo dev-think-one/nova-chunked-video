@@ -1,6 +1,6 @@
 <template>
-    <default-field :field="field" :errors="errors" :show-help-text="showHelpText">
-        <template slot="field">
+    <DefaultField :field="field" :errors="errors" :show-help-text="showHelpText">
+        <template #field>
             <template v-if="resourceId">
                 <div v-if="isUploading">
                     <div>
@@ -12,7 +12,7 @@
                 </div>
                 <template v-else>
                     <div v-if="isPreview">
-                        <video controls class="w-full max-w-md">
+                        <video controls class="w-full max-w-xl mb-4">
 
                             <source :src="field.previewUrl">
 
@@ -20,12 +20,13 @@
                         </video>
                     </div>
                     <div v-if="isPreview || isWaiting">
-                        <div class="relative">
-                            <input class="w-full opacity-0" style="height: 4rem" type="file"
+                        <div class="relative mb-4">
+                            <input style="cursor: pointer; opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                                   type="file"
                                    @change="select" :accept="field.acceptedTypes">
-                            <div style="top: 0; left: 0"
-                                 class="form-file-btn btn btn-default btn-primary select-none absolute top-left h-full flex text-center justify-center items-center p-4 pointer-events-none">
-                                {{ __('Click to select file from you device') }}
+                            <div style="pointer-events: none; width: 100%; height: 4rem;"
+                                 class="cursor-pointer focus:outline-none focus:ring rounded border-2 border-primary-300 dark:border-gray-500 hover:border-primary-500 active:border-primary-400 dark:hover:border-gray-400 dark:active:border-gray-300 bg-white dark:bg-transparent text-primary-500 dark:text-gray-400 px-3 h-9 inline-flex items-center justify-center font-bold flex-shrink-0">
+                                {{ __('Click to select file from your device') }}
                             </div>
                         </div>
                         <p class="pt-4 text-danger text-sm">
@@ -40,11 +41,12 @@
                 Uploading allowed only in edit mode
             </div>
         </template>
-    </default-field>
+    </DefaultField>
 </template>
 
 <script>
-import {FormField, HandlesValidationErrors} from 'laravel-nova'
+import {ref} from 'vue'
+import { FormField, HandlesValidationErrors } from '../../../node_modules/laravel-nova'
 
 export default {
     mixins: [FormField, HandlesValidationErrors],
@@ -61,11 +63,14 @@ export default {
     },
 
     watch: {
-        chunks(n, o) {
-            if (n.length > 0) {
-                this.upload();
+        chunks: {
+            deep: true,
+            handler(newVal, o) {
+                if (newVal.length > 0) {
+                    this.upload();
+                }
             }
-        }
+        },
     },
 
     computed: {

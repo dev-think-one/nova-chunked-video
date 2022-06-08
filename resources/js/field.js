@@ -1,5 +1,9 @@
-Nova.booting((Vue, router, store) => {
-  Vue.component('index-chunked-video', require('./components/IndexField'))
-  Vue.component('detail-chunked-video', require('./components/DetailField'))
-  Vue.component('form-chunked-video', require('./components/FormField'))
+import IndexField from './components/IndexField.vue'
+import DetailField from './components/DetailField.vue'
+import FormField from './components/FormField.vue'
+
+Nova.booting((app, store) => {
+    app.component('index-chunked-video', IndexField)
+    app.component('detail-chunked-video', DetailField)
+    app.component('form-chunked-video', FormField)
 })

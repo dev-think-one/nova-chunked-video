@@ -1,6 +1,6 @@
 <template>
-    <panel-item :field="field">
-        <template slot="value">
+    <PanelItem :index="index" :field="field">
+        <template #value>
             <video v-if="field.previewUrl" controls class="w-full max-w-md">
 
                 <source :src="field.previewUrl"
@@ -12,11 +12,11 @@
                 -
             </div>
         </template>
-    </panel-item>
+    </PanelItem>
 </template>
 
 <script>
 export default {
-    props: ['resource', 'resourceName', 'resourceId', 'field'],
+    props: ['index', 'resource', 'resourceName', 'resourceId', 'field'],
 }
 </script>

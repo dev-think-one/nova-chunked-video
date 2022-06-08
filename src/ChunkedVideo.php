@@ -3,14 +3,16 @@
 namespace Thinkone\ChunkedVideo;
 
 use Laravel\Nova\Fields\AcceptsTypes;
+use Laravel\Nova\Fields\Deletable;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Fields\HasPreview;
 use Laravel\Nova\Fields\Storable;
+use Laravel\Nova\Fields\SupportsDependentFields;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class ChunkedVideo extends Field
 {
-    use Storable, HasPreview, AcceptsTypes, FileChunkSize, HasChunkFolder;
+    use Storable, HasPreview, AcceptsTypes, FileChunkSize, HasChunkFolder, Deletable, SupportsDependentFields;
 
     /**
      * @inheritDoc
@@ -40,15 +42,15 @@ class ChunkedVideo extends Field
     /**
      * Prepare the field for JSON serialization.
      *
-     * @return array
+     * @return array<string, mixed>
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): array
     {
         return array_merge(parent::jsonSerialize(), [
-            'previewUrl' => $this->resolvePreviewUrl(),
+            'previewUrl'    => $this->resolvePreviewUrl(),
             'acceptedTypes' => $this->acceptedTypes,
-            'maxSize' => $this->getMaxSize(),
-            'chunkSize' => $this->getChunkSize(),
+            'maxSize'       => $this->getMaxSize(),
+            'chunkSize'     => $this->getChunkSize(),
         ]);
     }
 }
