@@ -121,7 +121,7 @@ export default {
 
         createChunks() {
             if (this.file.size > this.field.maxSize) {
-                this.$toasted.show('File to big, please select other file', {type: 'error'})
+                Nova.error('File to big, please select other file')
                 return;
             }
             this.chunksCount = 1;
@@ -165,7 +165,7 @@ export default {
                     this.chunks = [];
                     this.uploaded = 0;
 
-                    this.$toasted.show(this.__('Upload error, reload page and try again'), {type: 'error',})
+                    Nova.error(this.__('Upload error, reload page and try again'))
                 })
         },
     },

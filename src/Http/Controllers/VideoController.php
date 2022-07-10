@@ -28,7 +28,7 @@ class VideoController extends Controller
         /** @var ChunkedVideo|null $field */
         $field = $this->findField($request, $fields);
         if (!$field) {
-            throw new \Exception('Not valid field');
+            throw new \Exception("Not valid field [{$request->attribute}]");
         }
 
         $file      = $request->file('file');
@@ -82,7 +82,7 @@ class VideoController extends Controller
     {
         /** @var Field $field */
         foreach ($fields as $field) {
-            if (get_class($field) == 'Epartment\NovaDependencyContainer\NovaDependencyContainer') {
+            if (get_class($field) == 'Alexwenzel\DependencyContainer\DependencyContainer') {
                 if (!empty($field->meta['fields'])) {
                     $field = $this->findField($request, $field->meta['fields']);
                     if ($field && $field instanceof ChunkedVideo) {
