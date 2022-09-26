@@ -44,13 +44,10 @@ class VideoController extends Controller
         }
 
         // Set optimal memory limit
-        $cacheValue = ini_get('memory_limit');
         $newLimit   = ceil(($storage->size($path) + $file->getSize()) / 1000000) + 100;
         ini_set('memory_limit', "{$newLimit}M");
         // Append new content to file
         file_put_contents($storage->path($path), $file->get(), FILE_APPEND);
-        // Set memory back
-        ini_set('memory_limit', $cacheValue);
 
         // Validate file size
         if ($storage->size($path) > $field->getMaxSize()) {
