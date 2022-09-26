@@ -20,7 +20,7 @@ class VideoController extends Controller
         $model = $resource->model();
 
         if (!$model || !$request->user()) {
-            throw ValidationException::withMessages([ 'file' => 'not valid model' ]);
+            throw ValidationException::withMessages(['file' => 'not valid model']);
         }
 
         $fields = $resource->updateFields($request);
@@ -43,14 +43,20 @@ class VideoController extends Controller
             $storage->put($path, '');
         }
 
+        // Set optimal memory limit
+        $cacheValue = ini_get('memory_limit');
+        $newLimit   = ceil(($storage->size($path) + $file->getSize()) / 1000000) + 100;
+        ini_set('memory_limit', "{$newLimit}M");
         // Append new content to file
         file_put_contents($storage->path($path), $file->get(), FILE_APPEND);
+        // Set memory back
+        ini_set('memory_limit', $cacheValue);
 
         // Validate file size
         if ($storage->size($path) > $field->getMaxSize()) {
             $storage->delete($path);
 
-            throw ValidationException::withMessages([ 'file' => 'file greater than max size' ]);
+            throw ValidationException::withMessages(['file' => 'file greater than max size']);
         }
 
         if ($request->has('is_last') && $request->boolean('is_last')) {
@@ -64,16 +70,16 @@ class VideoController extends Controller
 
             $videoUrl = $field->storeFile($request, $newPath);
 
-            return response()->json([ 'uploaded' => true, 'video_url' => $videoUrl ]);
+            return response()->json(['uploaded' => true, 'video_url' => $videoUrl]);
         }
 
-        return response()->json([ 'uploaded' => true ]);
+        return response()->json(['uploaded' => true]);
     }
 
     /**
      * This function support "dependency container search"
      *
-     * @param NovaRequest $request
+     * @param  NovaRequest  $request
      * @param $fields
      *
      * @return Field|null
