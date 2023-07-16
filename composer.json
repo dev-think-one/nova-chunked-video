@@ -1,19 +1,19 @@
 {
-    "name": "yaroslawww/nova-chunked-video",
-    "description": "A highly targeted package for downloading video in chunks.",
+    "name": "think.studio/nova-chunked-video",
+    "description": "Laravel Nova field to upload big size video using chunks.",
     "keywords": [
-        "laravel-nova",
+        "laravel",
         "nova",
         "video",
         "upload",
         "chunks"
     ],
-    "homepage": "https://github.com/yaroslawww/nova-chunked-video",
+    "homepage": "https://github.com/dev-think-one/nova-chunked-video",
     "license": "MIT",
     "authors": [
         {
             "name": "Yaroslav Georgitsa",
-            "email": "yaroslav.georgitsa@gmail.com",
+            "email": "yg@think.studio",
             "homepage": "https://github.com/yaroslawww",
             "role": "Developer"
         }
