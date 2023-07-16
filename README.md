@@ -9,7 +9,7 @@ Laravel Nova field to upload big size video using chunks.
 | Nova | Package |
 |------|---------|
 | V1-3 | V1      |
-| V4   | V2      |
+| V4   | V2-3    |
 
 
 ## Installation
