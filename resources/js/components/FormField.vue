@@ -2,6 +2,7 @@
     <DefaultField :field="field" :errors="errors" :show-help-text="showHelpText">
         <template #field>
             <template v-if="resourceId">
+
                 <div v-if="isUploading">
                     <div>
                         <progress :value="progress" max="100" class="w-full"></progress>
@@ -10,31 +11,103 @@
                         {{ __('Uploading: Do not refresh the page or edit the form before it finishes loading') }}
                     </p>
                 </div>
+
                 <template v-else>
-                    <div v-if="isPreview">
-                        <video controls class="w-full max-w-xl mb-4">
 
-                            <source :src="field.previewUrl">
+                    <div
+                        v-if="videoUrl"
+                        class="video-wrapper inline-flex box-content border border-gray-200 dark:border-gray-700 rounded-lg divide-x divide-gray-200 dark:divide-gray-700 overflow-hidden">
+                        <div>
+                            <video
+                                controls
+                                controlsList="nodownload"
+                                :autoplay="false"
+                                class="flex-grow"
+                                :poster="imageUrl"
+                            >
+                                <source :src="videoUrl">
 
-                            {{ __('Sorry, your browser doesn\'t support embedded videos.') }}
-                        </video>
-                    </div>
-                    <div v-if="isPreview || isWaiting">
-                        <div class="relative mb-4">
-                            <input style="cursor: pointer; opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%"
-                                   type="file"
-                                   @change="select" :accept="field.acceptedTypes">
-                            <div style="pointer-events: none; width: 100%; height: 4rem;"
-                                 class="cursor-pointer focus:outline-none focus:ring rounded border-2 border-primary-300 dark:border-gray-500 hover:border-primary-500 active:border-primary-400 dark:hover:border-gray-400 dark:active:border-gray-300 bg-white dark:bg-transparent text-primary-500 dark:text-gray-400 px-3 h-9 inline-flex items-center justify-center font-bold flex-shrink-0">
-                                {{ __('Click to select file from your device') }}
-                            </div>
+                                {{ __('Sorry, your browser doesn\'t support embedded videos.') }}
+                            </video>
                         </div>
-                        <p class="pt-4 text-danger text-sm">
+                        <div class="flex-none flex flex-col divide-y divide-gray-200 dark:divide-gray-700">
+                            <a
+                                v-if="shouldShowRemoveButton"
+                                :dusk="currentField.attribute + '-delete-link'"
+                                type="button"
+                                class="cursor-pointer group-control flex items-center justify-center w-8 h-8"
+                                :title="__('Delete')"
+                                @click.prevent="confirmRemoval"
+                            >
+                                <Icon
+                                    type="trash"
+                                    width="16"
+                                    height="16"
+                                />
+                            </a>
+                            <a
+                                :href="videoUrl"
+                                target="_blank"
+                                :dusk="currentField.attribute + '-open-link'"
+                                type="button"
+                                class="cursor-pointer group-control flex items-center justify-center w-8 h-8"
+                                :title="__('Open')"
+                            >
+                                <Icon
+                                    type="external-link"
+                                    width="16"
+                                    height="16"
+                                />
+                            </a>
+                            <a v-if="currentField.downloadable"
+                               target="_blank"
+                               :dusk="currentField.attribute + '-download-link'"
+                               type="button"
+                               class="cursor-pointer group-control flex items-center justify-center w-8 h-8"
+                               :title="__('Download')"
+                               @keydown.enter.prevent="download"
+                               @click.prevent="download"
+                            >
+                                <Icon
+                                    type="download"
+                                    width="16"
+                                    height="16"
+                                />
+                            </a>
+                        </div>
+                        <ConfirmUploadRemovalModal
+                            :show="removeModalOpen"
+                            @confirm="removeFile"
+                            @close="closeRemoveModal"
+                        />
+                    </div>
+
+                    <div v-if="!isReadonly && (videoUrl || isWaiting)">
+                        <div class="relative mb-4">
+                            <input
+                                style="cursor: pointer; opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%"
+                                type="file"
+                                @change="select" :accept="currentField.acceptedTypes">
+                            <DefaultButton
+                                type="button"
+                                tabindex="0"
+                                class="pointer-events-none w-full flex-shrink-0"
+                            >{{ __('Click to select file from your device') }}
+                            </DefaultButton>
+                        </div>
+                        <p class="text-red-500 font-semibold text-sm">
                             {{
                                 __('The file will start uploading immediately after adding (without waiting for the form to be submitted). Make sure you have a fast and stable internet connection before uploading.')
                             }}
                         </p>
                     </div>
+
+                    <p
+                        v-if="hasError"
+                        class="text-xs mt-2 text-danger"
+                    >
+                        {{ firstError }}
+                    </p>
                 </template>
             </template>
             <div v-else>
@@ -45,20 +118,22 @@
 </template>
 
 <script>
-import {ref} from 'vue'
-import { FormField, HandlesValidationErrors } from '../../../node_modules/laravel-nova'
+import {DependentFormField, HandlesValidationErrors, Errors} from 'laravel-nova';
+import download from "../functions/download";
 
 export default {
-    mixins: [FormField, HandlesValidationErrors],
+    mixins: [DependentFormField, HandlesValidationErrors],
 
     props: ['resourceName', 'resourceId', 'field'],
 
     data() {
         return {
+            removeModalOpen: false,
             file: null,
             chunksCount: 0,
             chunks: [],
-            uploaded: 0
+            uploaded: 0,
+            uploadErrors: new Errors(),
         };
     },
 
@@ -74,14 +149,48 @@ export default {
     },
 
     computed: {
+        /**
+         * Determine if the field has an upload error.
+         */
+        hasError() {
+            return this.uploadErrors.has(this.fieldAttribute);
+        },
+
+        /**
+         * Return the first error for the field.
+         */
+        firstError() {
+            if (this.hasError) {
+                return this.uploadErrors.first(this.fieldAttribute);
+            }
+        },
+
+        /**
+         * Determine whether the file field input should be editable.
+         */
+        isReadonly() {
+            return Boolean(!!this.currentField.readonly);
+        },
+
+        /**
+         * Determine whether the field should show the remove button.
+         */
+        shouldShowRemoveButton() {
+            return Boolean(this.currentField.deletable && !this.isReadonly);
+        },
+
+        /**
+         * Return the preview URL for the field.
+         */
+        videoUrl() {
+            return this.currentField.previewUrl;
+        },
+
         isWaiting() {
-            return !this.field.previewUrl && !this.chunksCount && this.chunks.length <= 0;
+            return !this.videoUrl && !this.chunksCount && this.chunks.length <= 0;
         },
         isUploading() {
-            return !this.field.previewUrl && this.chunksCount || this.chunks.length > 0;
-        },
-        isPreview() {
-            return !!this.field.previewUrl;
+            return !this.videoUrl && this.chunksCount || this.chunks.length > 0;
         },
         progress() {
             if (this.file) {
@@ -104,14 +213,14 @@ export default {
          * Set the initial, internal value for the field.
          */
         setInitialValue() {
-            this.value = this.field.value || ''
+            this.value = this.currentField.value || ''
         },
 
         /**
          * Fill the given FormData object with the field's internal value.
          */
         fill(formData) {
-            formData.append(this.field.attribute, this.value || '')
+            formData.append(this.currentField.attribute, this.value || '')
         },
 
         select(event) {
@@ -119,17 +228,30 @@ export default {
             this.createChunks();
         },
 
+        /**
+         * Confirm removal of the linked file
+         */
+        confirmRemoval() {
+            this.removeModalOpen = true;
+        },
+        /**
+         * Close the upload removal modal
+         */
+        closeRemoveModal() {
+            this.removeModalOpen = false;
+        },
+
         createChunks() {
-            if (this.file.size > this.field.maxSize) {
+            if (this.file.size > this.currentField.maxSize) {
                 Nova.error('File to big, please select other file')
                 return;
             }
             this.chunksCount = 1;
-            let chunks = Math.ceil(this.file.size / this.field.chunkSize);
+            let chunks = Math.ceil(this.file.size / this.currentField.chunkSize);
             let tmpChunks = [];
             for (let i = 0; i < chunks; i++) {
                 tmpChunks.push(this.file.slice(
-                    i * this.field.chunkSize, Math.min(i * this.field.chunkSize + this.field.chunkSize, this.file.size),
+                    i * this.currentField.chunkSize, Math.min(i * this.currentField.chunkSize + this.currentField.chunkSize, this.file.size),
                     this.file.type
                 ));
             }
@@ -140,7 +262,7 @@ export default {
         upload() {
             Nova.request()
                 .post(
-                    `/nova-vendor/nova-chunked/video-upload/${this.resourceName}/${this.resourceId}/${this.field.attribute}`,
+                    `/nova-vendor/nova-chunked/video-upload/${this.resourceName}/${this.resourceId}/${this.currentField.attribute}`,
                     this.formData,
                     {
                         headers: {
@@ -156,7 +278,7 @@ export default {
                         this.chunksCount = 0;
                     }
                     if (response.data && response.data.video_url) {
-                        this.field.previewUrl = response.data.video_url;
+                        this.currentField.previewUrl = response.data.video_url;
                     }
                 })
                 .catch(() => {
@@ -168,20 +290,61 @@ export default {
                     Nova.error(this.__('Upload error, reload page and try again'))
                 })
         },
+        /**
+         * Remove the linked file from storage
+         */
+        async removeFile() {
+            this.uploadErrors = new Errors();
+            const {
+                resourceName,
+                resourceId,
+                relatedResourceName,
+                relatedResourceId,
+                viaRelationship,
+            } = this;
+            const {attribute} = this.currentField;
+            const uri = this.viaRelationship
+                ? `/nova-api/${resourceName}/${resourceId}/${relatedResourceName}/${relatedResourceId}/field/${attribute}?viaRelationship=${viaRelationship}`
+                : `/nova-api/${resourceName}/${resourceId}/field/${attribute}`;
+            try {
+                await Nova.request().delete(uri);
+                this.closeRemoveModal();
+                this.$emit('file-deleted');
+                Nova.success(this.__('The file was deleted!'));
+                this.currentField.previewUrl = null;
+            } catch (error) {
+                this.closeRemoveModal();
+                if (error.response.status == 422) {
+                    this.uploadErrors = new Errors(error.response.data.errors);
+                }
+            }
+        },
+
+        download() {
+            download(this.resourceName, this.resourceId, this.currentField.attribute)
+        },
     },
 }
 </script>
 
-<style scoped>
-progress::-moz-progress-bar {
-    background: #4099de;
+<style scoped lang="scss">
+progress {
+    color: rgba(var(--colors-primary-500));
+    border-radius: 5px;
+    border: 2px solid;
+    border-color: rgba(var(--colors-gray-200));
+}
+
+progress::-webkit-progress-bar {
+    border-radius: 5px;
+    background-color: rgba(var(--colors-gray-50));
+    border: 1px solid;
+    border-color: rgba(var(--colors-gray-200));
 }
 
 progress::-webkit-progress-value {
-    background: #4099de;
+    background-color: rgba(var(--colors-primary-500));
+    border-radius: 5px;
 }
 
-progress {
-    color: #4099de;
-}
 </style>

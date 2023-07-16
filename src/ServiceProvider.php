@@ -1,13 +1,12 @@
 <?php
 
-namespace Thinkone\ChunkedVideo;
+namespace NovaChunkedVideo;
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
 use Laravel\Nova\Events\ServingNova;
 use Laravel\Nova\Nova;
 
-class FieldServiceProvider extends ServiceProvider
+class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     /**
      * Bootstrap any application services.
@@ -61,7 +60,7 @@ class FieldServiceProvider extends ServiceProvider
                  if (config('nova-chunked.use_package_routes')) {
                      Route::post(
                          '/video-upload/{resource}/{resourceId}/{field}',
-                         [ \Thinkone\ChunkedVideo\Http\Controllers\VideoController::class, 'store' ]
+                         [ \NovaChunkedVideo\Http\Controllers\VideoController::class, 'store' ]
                      )->name('nova.chunked-video.upload');
                  }
              });

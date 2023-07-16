@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Thinkone\ChunkedVideo;
+namespace NovaChunkedVideo;
 
 use Laravel\Nova\Http\Requests\NovaRequest;
 

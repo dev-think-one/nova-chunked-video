@@ -5,5 +5,7 @@ vendor
 node_modules
 coverage
 .phpunit.result.cache
+/.phpunit.cache
 .idea
 .php-cs-fixer.cache
+/auth.json

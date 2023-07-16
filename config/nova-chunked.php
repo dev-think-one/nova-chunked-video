@@ -8,7 +8,7 @@ return [
 
     'validation' => [
         'chunk_size' => 10 * 1024 * 1024, // 10MB,
-        'max_size'   => 3 * 1024 * 1024 * 1024, // 3GB
+        'max_size'   => 3  * 1024 * 1024 * 1024, // 3GB
     ],
 
 ];

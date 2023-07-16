@@ -1,13 +1,13 @@
 <?php
 
-namespace Thinkone\ChunkedVideo\Http\Controllers;
+namespace NovaChunkedVideo\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Laravel\Nova\Fields\Field;
 use Laravel\Nova\Http\Requests\NovaRequest;
-use Thinkone\ChunkedVideo\ChunkedVideo;
+use NovaChunkedVideo\ChunkedVideo;
 
 class VideoController extends Controller
 {

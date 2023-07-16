@@ -1,14 +1,15 @@
-# Laravel nova "chunked-video"
-A highly targeted package for downloading video in chunks.
+# Laravel nova ChunkedVideo Field
+
+Laravel Nova field to upload big size video using chunks.
 
 ![](doc/assets/video-upload-example.gif)
 
 ## Versions targeting
 
-| Package | Nova  |
-|---------|-------|
-| 1.x     | 3.x   |
-| 2.x     | 4.x   |
+| Nova | Package |
+|------|---------|
+| V1-3 | V1      |
+| V4   | V2      |
 
 
 ## Installation
@@ -18,13 +19,13 @@ You can install the package via composer:
 ```bash
 composer require yaroslawww/nova-chunked-video
 # optional publish configs
-php artisan vendor:publish --provider="ThinkOne\ChunkedVideo\FieldServiceProvider" --tag="config"
+php artisan vendor:publish --provider="NovaChunkedVideo\FieldServiceProvider" --tag="config"
 ```
 
 ## Usage
 
 ```injectablephp
-ChunkedVideo::make( 'Video', 'big_video' )
+\NovaChunkedVideo\ChunkedVideo::make( 'Video', 'big_video' )
     ->acceptedTypes( 'video/mp4' )
     ->disk( 'my_private_disk' )
     ->store( function ( $filePath, $disk, $model, $attribute, $request ) {

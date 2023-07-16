@@ -1,6 +1,6 @@
 <?php
 
-namespace Thinkone\ChunkedVideo;
+namespace NovaChunkedVideo;
 
 trait FileChunkSize
 {
