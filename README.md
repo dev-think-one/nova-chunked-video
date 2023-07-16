@@ -31,7 +31,7 @@ php artisan vendor:publish --provider="NovaChunkedVideo\FieldServiceProvider" --
 
 ## Usage
 
-```injectablephp
+```php
 \NovaChunkedVideo\ChunkedVideo::make( 'Video', 'big_video' )
     ->acceptedTypes( 'video/mp4' )
     ->disk( 'my_private_disk' )
