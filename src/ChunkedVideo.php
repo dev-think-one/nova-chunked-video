@@ -44,15 +44,25 @@ class ChunkedVideo extends Field implements StorableContract, DeletableContract,
 
         parent::__construct($name, $attribute, $resolveCallback);
 
-        $this->delete(function () {
-            if ($this->value) {
-                Storage::disk($this->getStorageDisk())->delete($this->value);
+        $this
+            ->store(function ($filePath, $disk, $model, $attribute, $request) {
+                $model->$attribute = $filePath;
+                $model->save();
 
-                return [$this->attribute => null];
-            }
+                return Storage::disk($disk)->url($filePath);
+            })
+            ->preview(function ($value, ?string $disk, $model) {
+                return $value ? Storage::disk($disk)->url($value) : null;
+            })
+            ->delete(function () {
+                if ($this->value) {
+                    Storage::disk($this->getStorageDisk())->delete($this->value);
 
-            return null;
-        });
+                    return [$this->attribute => null];
+                }
+
+                return null;
+            });
     }
 
     /**
@@ -90,8 +100,8 @@ class ChunkedVideo extends Field implements StorableContract, DeletableContract,
         return array_merge(parent::jsonSerialize(), [
             'thumbnailUrl'  => $this->resolveThumbnailUrl(),
             'previewUrl'    => $previewUrl,
-            'downloadable'  => $this->downloadsAreEnabled   && isset($this->downloadResponseCallback) && !empty($previewUrl),
-            'deletable'     => isset($this->deleteCallback) && $this->deletable,
+            'downloadable'  => $this->downloadsAreEnabled && isset($this->downloadResponseCallback) && !empty($previewUrl),
+            'deletable'     => isset($this->deleteCallback)  && $this->deletable,
             'acceptedTypes' => $this->acceptedTypes,
             'maxSize'       => $this->getMaxSize(),
             'chunkSize'     => $this->getChunkSize(),

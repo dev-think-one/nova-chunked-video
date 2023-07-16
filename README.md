@@ -40,6 +40,7 @@ php artisan vendor:publish --provider="NovaChunkedVideo\FieldServiceProvider" --
         $model->big_video = $filePath;
         $model->save();
         
+        // WARNING: response should return url.
         return Storage::disk($disk)->url($filePath);
     } )
     ->preview( function ($value, $disk, $model ) {

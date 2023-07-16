@@ -3,15 +3,29 @@
 namespace NovaChunkedVideo\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Nova\NovaCoreServiceProvider;
+use NovaChunkedVideo\Tests\Fixtures\NovaServiceProvider;
 use Orchestra\Testbench\Database\MigrateProcessor;
 
 class TestCase extends \Orchestra\Testbench\TestCase
 {
     use RefreshDatabase;
 
+    protected string $defaultStorageName = 'default_test_storage';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Storage::fake($this->defaultStorageName);
+    }
+
     protected function getPackageProviders($app)
     {
         return [
+            NovaCoreServiceProvider::class,
+            NovaServiceProvider::class,
             \NovaChunkedVideo\ServiceProvider::class,
         ];
     }
@@ -44,6 +58,6 @@ class TestCase extends \Orchestra\Testbench\TestCase
             'prefix'   => '',
         ]);
 
-        // $app['config']->set('nova-seo-entity.some_key', 'some_value');
+        $app['config']->set('nova.storage_disk', $this->defaultStorageName);
     }
 }

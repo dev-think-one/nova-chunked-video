@@ -19,7 +19,7 @@ class VideoController extends Controller
 
         $model = $resource->model();
 
-        if (!$model || !$request->user()) {
+        if (!$model) {
             throw ValidationException::withMessages(['file' => 'not valid model']);
         }
 
@@ -32,10 +32,10 @@ class VideoController extends Controller
         }
 
         $file      = $request->file('file');
-        $storage   = Storage::disk($field->disk);
+        $storage   = Storage::disk($field->getStorageDisk());
         $chunksDir = $field->getChunksFolder();
 
-        $fileName = "{$model->getKey()}-{$request->user()->getKey()}-{$field->attribute}-{$file->getClientOriginalName()}";
+        $fileName = "{$model->getKey()}-{$request->user()?->getKey()}-{$field->attribute}-{$file->getClientOriginalName()}";
         $path     = "{$chunksDir}{$fileName}";
 
         // Create empty file if file not exists

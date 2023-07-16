@@ -13,14 +13,14 @@ trait HasChunkFolder
      *
      * @var string
      */
-    protected $chunksFolder;
+    protected string $chunksFolder;
 
     /**
      * The callback used to store file.
      *
      * @var callable
      */
-    public $storeFileCallback;
+    public ?\Closure $storeFileCallback = null;
 
     /**
      * Set chunk folder
@@ -70,6 +70,6 @@ trait HasChunkFolder
      */
     public function storeFile(NovaRequest $request, $filePath): ?string
     {
-        return call_user_func($this->storeFileCallback, $filePath, $this->getStorageDisk(), $this->resource, $request->field, $request);
+        return call_user_func($this->storeFileCallback, $filePath, $this->getStorageDisk(), $this->resource, $this->attribute, $request);
     }
 }
