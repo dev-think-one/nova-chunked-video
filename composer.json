@@ -39,11 +39,11 @@
     "autoload": {
         "psr-4": {
             "NovaChunkedVideo\\": "src/"
-        },
-        "autoload-dev": {
-            "psr-4": {
-                "NovaChunkedVideo\\Tests\\": "tests"
-            }
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "NovaChunkedVideo\\Tests\\": "tests"
         }
     },
     "extra": {
